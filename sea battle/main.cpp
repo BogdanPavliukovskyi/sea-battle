@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <ctime>
 
 using namespace std;
 
@@ -42,7 +43,7 @@ void showPlayerMap(vector <vector<int>> map){
     }
 }
 
-vector <vector<int>> changeValue(vector <vector<int>> map, string pos, int value){
+void changeValue(vector <vector<int>>& map, string pos, int value){
     int row;
     int col;
     
@@ -54,7 +55,6 @@ vector <vector<int>> changeValue(vector <vector<int>> map, string pos, int value
         col = pos[0] - 'a';
     }
     map[row][col] = value;
-    return map;
 }
 
 string askForPos(){
@@ -100,7 +100,7 @@ string getPos(int row, int col){
 
 
 
-bool checkSurrounding(const vector<vector<int>>& map, int row, int col){
+bool checkSurrounding(const vector<vector<int>> map, int row, int col){
     for(int i = -1; i <= 1; i++){
         for(int j = -1; j <= 1; j++){
             int r = row + i;
@@ -140,10 +140,10 @@ bool placeCheck(vector<vector<int>> map, string pos, int shipSize){
     return true;
 }
 
-vector <vector<int>> addShip(vector <vector<int>> map, string pos, int shipSize){
-    
-    
-    if(placeCheck(map, pos, shipSize)){
+void addShip(vector <vector<int>>& map, string pos, int shipSize){
+    if(!placeCheck(map, pos, shipSize)){
+        return;
+    }else{
         int row;
         int col;
 
@@ -157,7 +157,7 @@ vector <vector<int>> addShip(vector <vector<int>> map, string pos, int shipSize)
         
         if(col + shipSize > 10){
             cout << "The ship is too big" << endl;
-            return map;
+            return;
         }
         
         for (int i = 0; i < shipSize; i++){
@@ -165,10 +165,9 @@ vector <vector<int>> addShip(vector <vector<int>> map, string pos, int shipSize)
         }
     }
     
-    return map;
 }
 
-vector <vector<int>> fillMap(vector <vector<int>> map){
+void fillMap(vector <vector<int>>& map){
     int ship4Count = 1;
     int ship3Count = 2;
     int ship2Count = 3;
@@ -196,7 +195,7 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
                 break;
             }else{
                 pos = askForPos();
-                map = addShip(map, pos, 1);
+                addShip(map, pos, 1);
                 if(map != oldMap){
                     ship1Count--;
                 }
@@ -209,7 +208,7 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
                 break;
             }else{
                 pos = askForPos();
-                map = addShip(map, pos, 2);
+                addShip(map, pos, 2);
                 if(map != oldMap){
                     ship2Count--;
                 }
@@ -222,7 +221,7 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
                 break;
             }else{
                 pos = askForPos();
-                map = addShip(map, pos, 3);
+                addShip(map, pos, 3);
                 if(map != oldMap){
                     ship3Count--;
                 }
@@ -236,7 +235,7 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
                 break;
             }else{
                 pos = askForPos();
-                map = addShip(map, pos, 4);
+                addShip(map, pos, 4);
                 if(map != oldMap){
                     ship4Count--;
                 }
@@ -246,13 +245,72 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
         }
         
     }
-    return map;
+}
+
+void autoFillMap(vector <vector<int>>& map){
+    srand(time(0));
+    
+    int ship4Count = 1;
+    int ship3Count = 2;
+    int ship2Count = 3;
+    int ship1Count = 4;
+    
+    int shipSize;
+    
+    while(ship1Count > 0 || ship2Count > 0 || ship3Count > 0 || ship4Count > 0){
+        
+        if(ship4Count > 0){
+            shipSize = 4;
+        }else if(ship3Count > 0){
+            shipSize = 3;
+        }else if(ship2Count > 0){
+            shipSize = 2;
+        }else{
+            shipSize = 1;
+        }
+        
+        
+        bool placed = false;
+        
+        while(!placed){
+            int row = rand() % 10;
+            int col = rand() % (11 - shipSize);
+            
+            string pos = "";
+            
+            pos += 'a' + col;
+            pos += to_string(row + 1);
+            
+            if (placeCheck(map, pos, shipSize)){
+                addShip(map, pos, shipSize);
+                placed = true;
+            }
+        }
+        
+        
+        if(placed){
+            switch(shipSize){
+                case 1:
+                ship1Count--;
+                break;
+                case 2:
+                ship2Count--;
+                break;
+                case 3:
+                ship3Count--;
+                break;
+                case 4:
+                ship4Count--;
+            }
+        }
+    }
+    
 }
 
 int main()
 {
-    // showPlayerMap(createEmptyMap());
-    vector <vector<int>> map = fillMap(createEmptyMap());
+    vector <vector<int>> map = createEmptyMap();
+    autoFillMap(map);
     
     showPlayerMap(map);
     
