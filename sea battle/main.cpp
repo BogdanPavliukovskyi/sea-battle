@@ -1,11 +1,3 @@
-/******************************************************************************
-
-Welcome to GDB Online.
-GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
-C#, OCaml, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
-Code, Compile, Run and Debug online from anywhere in world.
-
-*******************************************************************************/
 #include <iostream>
 #include <vector>
 #include <cstdlib>
@@ -38,7 +30,7 @@ void showPlayerMap(vector <vector<int>> map){
                 cout << "  ";
                 break;
                 case 1:
-                cout << "■ ";
+                cout << "# ";
                 break;
                 case 2:
                 cout << "X ";
@@ -101,21 +93,80 @@ string posMinus1l(string pos){
 
 string getPos(int row, int col){
     string pos = "";
-    pos += 'a' + row;
-    pos += to_string(col+1);
+    pos += 'a' + col ;
+    pos += to_string(row+1);
+    return pos;
 }
 
-// bool placeCheck(vector <vector<int>> map, string pos, int shipSize){
-//     vector <string> vec;
-//     for(int i = 0; i < 10; i++){
-//         for (int j = 0; j < 10; j++){
-//             if(map[i][j] == 1){
-//                 vec.push_back(getPos(i, j))
-                
-//             }
-//         }
-//     }
-// }
+
+
+bool checkSurrounding(const vector<vector<int>>& map, int row, int col){
+    for(int i = -1; i <= 1; i++){
+        for(int j = -1; j <= 1; j++){
+            int r = row + i;
+            int c = col + j;
+            if(r >= 0 && r < 10 && c >= 0 && c < 10){
+                if(map[r][c] != 0){
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+bool placeCheck(vector<vector<int>> map, string pos, int shipSize){
+    int row;
+    int col;
+
+    if(pos.size() == 2){
+        row = pos[1] - '0' - 1;
+        col = pos[0] - 'a';
+    }else{
+        row = 9;
+        col = pos[0] - 'a';
+    }
+
+    if(col + shipSize > 10){
+        return false;
+    }
+
+    for(int i = 0; i < shipSize; i++){
+        if(!checkSurrounding(map, row, col + i)){
+            return false;
+        }
+    }
+
+    return true;
+}
+
+vector <vector<int>> addShip(vector <vector<int>> map, string pos, int shipSize){
+    
+    
+    if(placeCheck(map, pos, shipSize)){
+        int row;
+        int col;
+
+        if(pos.size() == 2){
+            row = pos[1] - '0' - 1;
+            col = pos[0] - 'a';
+        }else{
+            row = 9;
+            col = pos[0] - 'a';
+        }
+        
+        if(col + shipSize > 10){
+            cout << "The ship is too big" << endl;
+            return map;
+        }
+        
+        for (int i = 0; i < shipSize; i++){
+            map[row][col + i] = 1;
+        }
+    }
+    
+    return map;
+}
 
 vector <vector<int>> fillMap(vector <vector<int>> map){
     int ship4Count = 1;
@@ -131,10 +182,12 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
         
         showPlayerMap(map);
         
-        cout << "\nSHIPS LEFT:\n■■■■ x" << ship4Count << "\n■■■  x" << ship3Count << "\n■■   x" << ship2Count << "\n■    x" << ship1Count << endl;
+        cout << "\nSHIPS LEFT:\n#### x" << ship4Count << "\n###  x" << ship3Count << "\n##   x" << ship2Count << "\n#    x" << ship1Count << endl;
         
         cout << "\nChoose the ship you want to place (enter its size 1 - 4) ";
         cin >> choice;
+        
+        vector <vector<int>> oldMap = map;
         
         switch(choice){
             case 1:
@@ -143,8 +196,10 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
                 break;
             }else{
                 pos = askForPos();
-                map = changeValue(map, pos, 1);
-                ship1Count--;
+                map = addShip(map, pos, 1);
+                if(map != oldMap){
+                    ship1Count--;
+                }
                 break;
             }
             break;
@@ -154,10 +209,10 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
                 break;
             }else{
                 pos = askForPos();
-                map = changeValue(map, pos, 1);
-                ship2Count--;
-                pos = posPlus1l(pos);
-                map = changeValue(map, pos, 1);
+                map = addShip(map, pos, 2);
+                if(map != oldMap){
+                    ship2Count--;
+                }
                 break;
             }
             break;
@@ -167,11 +222,9 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
                 break;
             }else{
                 pos = askForPos();
-                map = changeValue(map, pos, 1);
-                ship3Count--;
-                for(int i = 0; i < 2; i++){
-                    pos = posPlus1l(pos);
-                    map = changeValue(map, pos, 1);
+                map = addShip(map, pos, 3);
+                if(map != oldMap){
+                    ship3Count--;
                 }
                 break;
                 
@@ -183,11 +236,9 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
                 break;
             }else{
                 pos = askForPos();
-                map = changeValue(map, pos, 1);
-                ship4Count--;
-                for(int i = 0; i < 3; i++){
-                    pos = posPlus1l(pos);
-                    map = changeValue(map, pos, 1);
+                map = addShip(map, pos, 4);
+                if(map != oldMap){
+                    ship4Count--;
                 }
                 break;
             }
@@ -201,7 +252,10 @@ vector <vector<int>> fillMap(vector <vector<int>> map){
 int main()
 {
     // showPlayerMap(createEmptyMap());
-    fillMap(createEmptyMap());
+    vector <vector<int>> map = fillMap(createEmptyMap());
+    
+    showPlayerMap(map);
+    
 
     return 0;
 }
