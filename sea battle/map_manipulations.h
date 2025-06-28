@@ -22,4 +22,5 @@ void fillMap(vector <vector<int>>& map);
 void autoFillMap(vector <vector<int>>& map);
 void attack(vector <vector<int>>& map, string pos);
 
+
 #endif

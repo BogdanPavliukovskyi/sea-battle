@@ -85,26 +85,27 @@ void aiAttack(vector <vector<int>>& map, vector <Hit>& memory, Mode& aiMode){
                 }
                 return;
         }
-        aiMode = RANDOM;
-        int row = rand() % 10;
-        int col = rand() % 10;
-        
-        string pos = "";
-        
-        pos += 'a' + col;
-        pos += to_string(row + 1);
-        
-        if(map[row][col] != 2 && map[row][col] != 3){
+        while(true){
+            int row = rand() % 10;
+            int col = rand() % 10;
             
-            attack(map, pos);
+            string pos = "";
             
-            if(map[row][col] == 2){
-                memory = { {row, col - 1}, {row, col + 1} };
+            pos += 'a' + col;
+            pos += to_string(row + 1);
+            
+            if(map[row][col] != 2 && map[row][col] != 3){
                 
-                aiMode = AIM;
+                attack(map, pos);
+                
+                if(map[row][col] == 2){
+                    memory = { {row, col - 1}, {row, col + 1} };
+                    
+                    aiMode = AIM;
+                    break;
+                }
+                break;
             }
-            return;
-    
         }
         break;
     }
@@ -131,10 +132,91 @@ int main()
         case 2:
         autoFillMap(playerMap);
         break;
+        default:
+        autoFillMap(playerMap);
+        break;
     }
     
     cout << "\nYOUR MAP:\n";
     showPlayerMap(playerMap);
+    
+    cout << "\nENEMY MAP\n";
+    showAiMap(aiMap);
+    
+    bool game = true;
+    string attackPos;
+    
+    while (game){
+        bool attackCheck = false;
+        while(!attackCheck){
+            cout << "Your turn!\nEnter the position you want to attack ";
+            cin >> attackPos;
+            int row;
+            int col;
+        
+            if(attackPos.size() == 2){
+                row = attackPos[1] - '0' - 1;
+                col = attackPos[0] - 'a';
+            }else{
+                row = 9;
+                col = attackPos[0] - 'a';
+            }
+            int oldValue = aiMap[row][col];
+            
+            attack(aiMap, attackPos);
+            
+            if(aiMap[row][col] == oldValue){
+                cout << "Try again" << endl;
+            }else{
+                attackCheck = true;
+            }
+        }
+        
+        cout << "Enemy turn!" << endl;
+        
+        aiAttack(playerMap, memory, aiMode);
+        
+        cout << "\nYOUR MAP:\n";
+        showPlayerMap(playerMap);
+     
+        cout << "\nENEMY MAP\n";
+        showAiMap(aiMap);
+        
+        bool allPlayerShipsSunk = true;
+        
+        for(int i = 0; i < 10; i++){
+            for(int j = 0; j < 10; j++){
+                if(playerMap[i][j] == 1){
+                    allPlayerShipsSunk = false;
+                    break;
+                }
+            }
+            if(!allPlayerShipsSunk) break;
+        }
+        
+        if(allPlayerShipsSunk){
+            cout << "\nGAME OVER\n";
+            game = false;
+        }
+        
+        bool allAiShipsSunk = true;
+        
+        for(int i = 0; i < 10; i++){
+            for(int j = 0; j < 10; j++){
+                if(aiMap[i][j] == 1){
+                    allAiShipsSunk = false;
+                    break;
+                }
+            }
+            if(!allAiShipsSunk) break;
+        }
+        
+        if(allAiShipsSunk){
+            cout << "\nVICTORY\n";
+            game = false;
+        }
+        
+    }
     
     return 0;
 }

@@ -59,7 +59,7 @@ void showAiMap(vector <vector<int>> map){
                 cout << "  ";
                 break;
                 case 1:
-                cout << " ";
+                cout << "  ";
                 break;
                 case 2:
                 cout << "X ";
@@ -354,3 +354,4 @@ void attack(vector <vector<int>>& map, string pos){
         map[row][col] = 3;
     }
 }
+
